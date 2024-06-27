@@ -1,0 +1,37 @@
+import dlib
+import numpy as np
+import cv2
+
+# Load the pre-trained models for face detection and recognition
+detector = dlib.get_frontal_face_detector()
+sp = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+facerec = dlib.face_recognition_model_v1('dlib_face_recognition_resnet_model_v1.dat')
+
+# Function to compute the face descriptor
+def get_face_descriptor("C:\Users\DELL\OneDrive\Pictures\Camera Roll\WIN_20240626_08_01_51_Pro.jpg"):
+    # Load the image
+    image = cv2.imread("C:\Users\DELL\OneDrive\Pictures\Camera Roll\WIN_20240626_08_01_51_Pro.jpg")
+    # Detect faces
+    dets = detector(image, 1)
+    
+    for k, d in enumerate(dets):
+        # Get the landmarks
+        shape = sp(image, d)
+        # Compute the face descriptor
+        face_descriptor = facerec.compute_face_descriptor(image, shape)
+        return np.array(face_descriptor)
+    return None
+
+# Example usage
+known_face_descriptor = get_face_descriptor("C:\Users\DELL\OneDrive\Pictures\Camera Roll\WIN_20240626_08_01_51_Pro.jpg")
+unknown_face_descriptor = get_face_descriptor('path_to_unknown_image.jpg')
+
+# Compute the Euclidean distance between the face descriptors
+distance = np.linalg.norm(known_face_descriptor - unknown_face_descriptor)
+print(f'Distance between faces: {distance}')
+
+# A typical threshold for considering two faces as the same is around 0.6
+if distance < 0.6:
+    print('Faces match')
+else:
+    print('Faces do not match')
